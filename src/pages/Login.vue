@@ -24,12 +24,18 @@
 </template>
 <script setup>
 import { reactive } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { login } from '../api/login';
 import { message } from 'ant-design-vue';
 const formState = reactive({
   name: 'dz',
   pass: '123',
 });
+
+const router = useRouter();
+console.log('router:', router);
+const route = useRoute();
+console.log('route:', route);
 
 const formRules = reactive({
   name: [{ required: true, message: '请输入账号' }],
@@ -42,7 +48,8 @@ const onFinish = (values) => {
     if (res.code !== 0) {
       message.error(res.message);
     } else {
-      // TODO: 登录成功逻辑
+      localStorage.setItem('token', res.data.token);
+      router.push(route.query.redirect || '/');
     }
   });
 };
@@ -55,10 +62,10 @@ const onFinishFailed = (errorInfo) => {
 .login_container {
   width: 100%;
   height: 100%;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  .login_container_box{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  .login_container_box {
     padding: 50px;
     width: 500px;
     height: 300px;

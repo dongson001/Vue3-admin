@@ -5,8 +5,8 @@ var instance = axios.create();
 
 instance.interceptors.request.use(
   (config) => {
-    const token = 'store.state.token';
-    token && (config.headers.Authorization = token);
+    const token = localStorage.getItem('token');
+    token && (config.headers.Authorization = `Bearer ` + token);
     return config;
   },
   (error) => Promise.error(error)
