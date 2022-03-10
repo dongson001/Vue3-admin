@@ -1,4 +1,6 @@
 import axios from 'axios';
+import router from '../router/index';
+
 import { message } from 'ant-design-vue';
 
 var instance = axios.create();
@@ -33,7 +35,7 @@ instance.interceptors.response.use(
         // 未登录则跳转登录页面，并携带当前页面的路径
         // 在登录成功后返回当前页面，这一步需要在登录页操作。
         case 401:
-          router.replace({
+          router.push({
             path: '/login',
             query: {
               redirect: router.currentRoute.fullPath,
@@ -51,7 +53,7 @@ instance.interceptors.response.use(
           localStorage.removeItem('token');
           // 跳转登录页面，并将要浏览的页面fullPath传过去，登录成功后跳转需要访问的页面
           setTimeout(() => {
-            router.replace({
+            router.push({
               path: '/login',
               query: {
                 redirect: router.currentRoute.fullPath,

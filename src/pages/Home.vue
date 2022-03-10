@@ -6,7 +6,7 @@
 import { user } from '../api/login';
 import { onMounted, reactive } from 'vue';
 let userInfo = reactive({
-  name: '123'
+  name: ''
 });
 onMounted(() => {
   user().then((res) => {
