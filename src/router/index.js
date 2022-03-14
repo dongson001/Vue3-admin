@@ -5,6 +5,13 @@ import Login from '../pages/Login.vue';
 const routes = [
   { path: '/', component: Home },
   { path: '/Login', component: Login },
+  {
+    path: '/userList',
+    name: 'userList',
+    component: import(
+      /* webpackChunkName: "userList" */ '../pages/UserList.vue'
+    ),
+  },
 ];
 
 const router = createRouter({
