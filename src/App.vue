@@ -23,6 +23,24 @@ import MyHeader from './components/MyHeader.vue';
 import MySider from './components/MySider.vue';
 import MyContent from './components/MyContent.vue';
 let route = useRoute();
+const menuList = [
+  {
+    name: '开发中心',
+    key: 'user',
+    children: [
+      {
+        name: '账号管理',
+        key: 'user',
+        children: [
+          {
+            name: '用户列表',
+            key: 'userList'
+          }
+        ]
+      }
+    ]
+  }
+]
 </script>
 
 <style lang="scss">

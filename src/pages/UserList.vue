@@ -18,11 +18,11 @@
       </a-row>
     </a-form>
     <div class="search-btn">
-    <a-button type="primary">查询</a-button>
+      <a-button type="primary">查询</a-button>
     </div>
   </div>
   <div class="table-box">
-    <a-table></a-table>
+    <a-table :columns="columns" :data-source="data"></a-table>
   </div>
 </template>
 
@@ -31,7 +31,33 @@ import { reactive } from 'vue';
 let formState = reactive({
   name: '',
 });
-const onFinish = values => {
+const columns = [
+  {
+    name: 'Name',
+    dataIndex: 'name',
+    key: 'name',
+  },
+  {
+    title: 'Age',
+    dataIndex: 'age',
+    key: 'age',
+  },
+  {
+    title: 'Address',
+    dataIndex: 'address',
+    key: 'address',
+  },
+  {
+    title: 'Tags',
+    key: 'tags',
+    dataIndex: 'tags',
+  },
+  {
+    title: 'Action',
+    key: 'action',
+  },
+];
+const onFinish = (values) => {
   console.log('Received values of form: ', values);
   console.log('formState: ', formState);
 };
