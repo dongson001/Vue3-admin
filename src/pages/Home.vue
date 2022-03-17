@@ -1,17 +1,17 @@
 <template>
-  <div>home{{ userInfo.name }}</div>
+  <div>home{{ user.name }}</div>
 </template>
 
 <script setup>
-import { user } from '../api/login';
+import { userInfo } from '../api/user';
 import { onMounted, reactive } from 'vue';
-let userInfo = reactive({
+let user = reactive({
   name: ''
 });
 onMounted(() => {
-  user().then((res) => {
+  userInfo().then((res) => {
     if (res.code === 0) {
-      userInfo = res.data;
+      user = res.data;
       console.log('userInfo:', userInfo);
     }
   });

@@ -25,7 +25,7 @@
 <script setup>
 import { reactive } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { login } from '../api/login';
+import { login } from '../api/user';
 import { message } from 'ant-design-vue';
 const formState = reactive({
   name: 'dz',
