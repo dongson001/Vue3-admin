@@ -14,6 +14,10 @@
         <a-form-item label="密码" name="pass">
           <a-input-password v-model:value="formState.pass" />
         </a-form-item>
+        <a-form-item label="验证码" name="captcha">
+          <a-input v-model:value="formState.captcha" />
+          <img @click="getCaptcha" :src="state.captcha" alt="">
+        </a-form-item>
 
         <a-form-item :wrapper-col="{ offset: 8, span: 16 }">
           <a-button type="primary" html-type="submit">登 录</a-button>
@@ -23,14 +27,24 @@
   </div>
 </template>
 <script setup>
-import { reactive } from 'vue';
+import { reactive, ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { login } from '../api/user';
 import { message } from 'ant-design-vue';
 const formState = reactive({
   name: 'dz',
   pass: '123',
+  captcha: ''
 });
+
+
+let state = reactive({
+  captcha: 'api/captcha'
+})
+
+function getCaptcha() {
+  state.captcha = 'api/captcha?_t='+ new Date().getTime()
+}
 
 const router = useRouter();
 console.log('router:', router);
@@ -40,6 +54,7 @@ console.log('route:', route);
 const formRules = reactive({
   name: [{ required: true, message: '请输入账号' }],
   pass: [{ required: true, message: '请输入密码' }],
+  captcha: [{ required: true, message: '请输入验证码' }],
 });
 
 const onFinish = (values) => {
