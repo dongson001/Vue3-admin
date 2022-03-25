@@ -11,25 +11,19 @@
         }"
         @finishFailed="onFinishFailed"
       >
-        <a-form-item label="账号" name="name">
-          <a-input v-model:value="formState.name">
+        <a-form-item label="邮箱" name="email">
+          <a-input v-model:value="formState.email">
             <template #prefix>
               <UserOutlined class="site-form-item-icon" />
             </template>
           </a-input>
         </a-form-item>
-        <a-form-item label="密码" name="pass">
-          <a-input-password v-model:value="formState.pass">
+        <a-form-item label="昵称" name="email">
+          <a-input v-model:value="formState.email">
             <template #prefix>
-              <LockOutlined class="site-form-item-icon" />
+              <UserOutlined class="site-form-item-icon" />
             </template>
-          </a-input-password>
-        </a-form-item>
-        <a-form-item label="验证码" name="captcha">
-          <div class="flex">
-            <a-input v-model:value="formState.captcha" />
-            <img @click="getCaptcha" :src="state.captcha" alt="">
-          </div>
+          </a-input>
         </a-form-item>
         <a-form-item :wrapper-col="{ offset: 8, span: 16 }">
           <a-button type="primary" html-type="submit">登 录</a-button>
@@ -45,7 +39,7 @@ import { login } from '../api/user';
 import { message } from 'ant-design-vue';
 import { UserOutlined, LockOutlined } from '@ant-design/icons-vue';
 const formState = reactive({
-  name: 'dz',
+  email: 'dz',
   pass: '123',
   captcha: ''
 });
@@ -65,21 +59,14 @@ const route = useRoute();
 console.log('route:', route);
 
 const formRules = reactive({
-  name: [{ required: true, message: '请输入账号' }],
+  email: [{ required: true, message: '请输入邮箱'} , {type: 'email', message: '请输入正确的邮箱格式'}],
   pass: [{ required: true, message: '请输入密码' }],
   captcha: [{ required: true, message: '请输入验证码' }],
 });
 
 const onFinish = (values) => {
   console.log('Success:', values);
-  login(formState).then((res) => {
-    if (res.code !== 0) {
-      message.error(res.message);
-    } else {
-      localStorage.setItem('token', res.data.token);
-      router.push(route.query.redirect || '/');
-    }
-  });
+  
 };
 
 const onFinishFailed = (errorInfo) => {
