@@ -9,7 +9,6 @@
         :labelCol="{
           span: 6,
         }"
-        @finishFailed="onFinishFailed"
       >
         <a-form-item label="邮箱" name="email">
           <a-input v-model:value="formState.email">
@@ -18,15 +17,31 @@
             </template>
           </a-input>
         </a-form-item>
-        <a-form-item label="昵称" name="email">
-          <a-input v-model:value="formState.email">
+        <a-form-item label="验证码" name="captcha">
+          <div class="flex">
+            <a-input v-model:value="formState.captcha" />
+            <img @click="getCaptcha" :src="state.captcha" alt="" />
+          </div>
+        </a-form-item>
+        <a-form-item label="昵称" name="nikeName">
+          <a-input v-model:value="formState.nikeName"> </a-input>
+        </a-form-item>
+        <a-form-item label="密码" name="passwd">
+          <a-input-password v-model:value="formState.passwd">
             <template #prefix>
-              <UserOutlined class="site-form-item-icon" />
+              <LockOutlined class="site-form-item-icon" />
             </template>
-          </a-input>
+          </a-input-password>
+        </a-form-item>
+        <a-form-item label="确认密码" name="repasswd">
+          <a-input-password v-model:value="formState.repasswd">
+            <template #prefix>
+              <LockOutlined class="site-form-item-icon" />
+            </template>
+          </a-input-password>
         </a-form-item>
         <a-form-item :wrapper-col="{ offset: 8, span: 16 }">
-          <a-button type="primary" html-type="submit">登 录</a-button>
+          <a-button type="primary" html-type="submit">注 册</a-button>
         </a-form-item>
       </a-form>
     </div>
@@ -35,22 +50,24 @@
 <script setup>
 import { reactive } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { login } from '../api/user';
+import md5 from 'md5';
+import { register } from '../api/user';
 import { message } from 'ant-design-vue';
 import { UserOutlined, LockOutlined } from '@ant-design/icons-vue';
 const formState = reactive({
-  email: 'dz',
-  pass: '123',
-  captcha: ''
+  email: 'dz@qq.com',
+  nikeName: 'dz',
+  passwd: 'a123456',
+  repasswd: 'a123456',
+  captcha: '',
 });
 
-
 let state = reactive({
-  captcha: 'api/captcha'
-})
+  captcha: 'api/captcha',
+});
 
 function getCaptcha() {
-  state.captcha = 'api/captcha?_t='+ new Date().getTime()
+  state.captcha = 'api/captcha?_t=' + new Date().getTime();
 }
 
 const router = useRouter();
@@ -59,18 +76,49 @@ const route = useRoute();
 console.log('route:', route);
 
 const formRules = reactive({
-  email: [{ required: true, message: '请输入邮箱'} , {type: 'email', message: '请输入正确的邮箱格式'}],
-  pass: [{ required: true, message: '请输入密码' }],
+  email: [
+    { required: true, message: '请输入邮箱' },
+    { type: 'email', message: '请输入正确的邮箱格式' },
+  ],
+  nikeName: [{ required: true, message: '请输入昵称' }],
+  passwd: [
+    {
+      required: true,
+      pattern: /^[\w_-]{6,12}$/g,
+      message: '请输入6-12的密码',
+    },
+  ],
+  repasswd: [
+    { required: true, message: '请再次输入密码' },
+    {
+      validator: (rule, value, callback) => {
+        if (value !== formState.passwd) {
+          return Promise.reject(new Error('两次密码不一致'));
+        }
+        return Promise.resolve();
+      },
+    },
+  ],
   captcha: [{ required: true, message: '请输入验证码' }],
 });
 
 const onFinish = (values) => {
   console.log('Success:', values);
-  
-};
-
-const onFinishFailed = (errorInfo) => {
-  console.log('Failed:', errorInfo);
+  let { email, passwd, nikeName, captcha } = values;
+  let obj = {
+    email,
+    passwd: md5(passwd),
+    nikeName,
+    captcha,
+  };
+  register(obj).then((res) => {
+    if (res.code !== 0) {
+      message.error(res.message);
+    } else {
+      message.success('注册成功');
+      router.push('/Login');
+    }
+  });
 };
 </script>
 <style lang="scss" scoped>
@@ -84,7 +132,7 @@ const onFinishFailed = (errorInfo) => {
     padding: 50px;
     margin-top: 100px;
     width: 500px;
-    height: 300px;
+    min-height: 300px;
     border: 1px solid #ccc;
   }
 }
