@@ -23,8 +23,8 @@
             <img @click="getCaptcha" :src="state.captcha" alt="" />
           </div>
         </a-form-item>
-        <a-form-item label="昵称" name="nikeName">
-          <a-input v-model:value="formState.nikeName"> </a-input>
+        <a-form-item label="昵称" name="nickname">
+          <a-input v-model:value="formState.nickname"> </a-input>
         </a-form-item>
         <a-form-item label="密码" name="passwd">
           <a-input-password v-model:value="formState.passwd">
@@ -56,7 +56,7 @@ import { message } from 'ant-design-vue';
 import { UserOutlined, LockOutlined } from '@ant-design/icons-vue';
 const formState = reactive({
   email: 'dz@qq.com',
-  nikeName: 'dz',
+  nickname: 'dz',
   passwd: 'a123456',
   repasswd: 'a123456',
   captcha: '',
@@ -80,7 +80,7 @@ const formRules = reactive({
     { required: true, message: '请输入邮箱' },
     { type: 'email', message: '请输入正确的邮箱格式' },
   ],
-  nikeName: [{ required: true, message: '请输入昵称' }],
+  nickname: [{ required: true, message: '请输入昵称' }],
   passwd: [
     {
       required: true,
@@ -104,11 +104,11 @@ const formRules = reactive({
 
 const onFinish = (values) => {
   console.log('Success:', values);
-  let { email, passwd, nikeName, captcha } = values;
+  let { email, passwd, nickname, captcha } = values;
   let obj = {
     email,
     passwd: md5(passwd),
-    nikeName,
+    nickname,
     captcha,
   };
   register(obj).then((res) => {

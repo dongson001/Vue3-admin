@@ -1,5 +1,5 @@
 <template>
-  <template v-if="route.path === '/login' || route.path === '/Register'">
+  <template v-if="route.path === '/login' || route.path === '/register'">
     <router-view></router-view>
   </template>
   <template v-else>
