@@ -11,15 +11,15 @@
         }"
         @finishFailed="onFinishFailed"
       >
-        <a-form-item label="账号" name="name">
-          <a-input v-model:value="formState.name">
+        <a-form-item label="邮箱" name="email">
+          <a-input v-model:value="formState.email">
             <template #prefix>
               <UserOutlined class="site-form-item-icon" />
             </template>
           </a-input>
         </a-form-item>
-        <a-form-item label="密码" name="pass">
-          <a-input-password v-model:value="formState.pass">
+        <a-form-item label="密码" name="passwd">
+          <a-input-password v-model:value="formState.passwd">
             <template #prefix>
               <LockOutlined class="site-form-item-icon" />
             </template>
@@ -28,7 +28,19 @@
         <a-form-item label="验证码" name="captcha">
           <div class="flex">
             <a-input v-model:value="formState.captcha" />
-            <img @click="getCaptcha" :src="state.captcha" alt="">
+            <img @click="getCaptcha" :src="state.captcha" alt="" />
+          </div>
+        </a-form-item>
+        <a-form-item label="邮箱验证码" name="emailcode">
+          <div class="flex">
+            <a-input v-model:value="formState.emailcode" />
+            <a-button
+              type="primary"
+              class="emailcode"
+              @click="sendEmailCode"
+              :disabled="state.timer > 0"
+              >{{ sendText }}</a-button
+            >
           </div>
         </a-form-item>
         <a-form-item :wrapper-col="{ offset: 8, span: 16 }">
@@ -39,24 +51,26 @@
   </div>
 </template>
 <script setup>
-import { reactive } from 'vue';
+import { reactive, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { login } from '../api/user';
+import { login, sendEmail } from '../api/user';
+import md5 from 'md5';
 import { message } from 'ant-design-vue';
 import { UserOutlined, LockOutlined } from '@ant-design/icons-vue';
 const formState = reactive({
-  name: 'dz',
-  pass: '123',
-  captcha: ''
+  email: '825826837@qq.com',
+  passwd: 'a123456',
+  captcha: '',
+  emailcode: '',
 });
 
-
 let state = reactive({
-  captcha: 'api/captcha'
-})
+  captcha: 'api/captcha',
+  timer: 0,
+});
 
 function getCaptcha() {
-  state.captcha = 'api/captcha?_t='+ new Date().getTime()
+  state.captcha = 'api/captcha?_t=' + new Date().getTime();
 }
 
 const router = useRouter();
@@ -65,22 +79,62 @@ const route = useRoute();
 console.log('route:', route);
 
 const formRules = reactive({
-  name: [{ required: true, message: '请输入账号' }],
-  pass: [{ required: true, message: '请输入密码' }],
+  email: [
+    { required: true, message: '请输入邮箱' },
+    { type: 'email', message: '请输入正确的邮箱格式' },
+  ],
+  passwd: [
+    {
+      required: true,
+      pattern: /^[\w_-]{6,12}$/g,
+      message: '请输入6-12的密码',
+    },
+  ],
   captcha: [{ required: true, message: '请输入验证码' }],
+  emailcode: [{ required: true, message: '请输入邮箱验证码' }],
 });
 
 const onFinish = (values) => {
   console.log('Success:', values);
-  login(formState).then((res) => {
+  let { email, passwd, captcha } = values;
+  let obj = {
+    email,
+    passwd: md5(passwd),
+    captcha,
+  };
+  login(obj).then((res) => {
     if (res.code !== 0) {
       message.error(res.message);
     } else {
+      message.success('登录成功');
       localStorage.setItem('token', res.data.token);
-      router.push(route.query.redirect || '/');
+      setTimeout(() => {
+        router.push(route.query.redirect || '/');
+      }, 500);
     }
   });
 };
+
+const sendText = computed(() => {
+  if (state.timer <= 0) {
+    return '发送';
+  } else {
+    return `${state.timer}S后发送`;
+  }
+});
+
+function sendEmailCode() {
+  sendEmail({ email: formState.email }).then((res) => {
+    console.log('res:', res)
+  });
+  state.timer = 10;
+  state.time = setInterval(() => {
+    state.timer -= 1;
+    if (state.timer === 0) {
+      clearInterval(state.time);
+    }
+  }, 1000);
+}
 
 const onFinishFailed = (errorInfo) => {
   console.log('Failed:', errorInfo);
@@ -97,8 +151,13 @@ const onFinishFailed = (errorInfo) => {
     padding: 50px;
     margin-top: 100px;
     width: 500px;
-    height: 300px;
     border: 1px solid #ccc;
+    .emailcode {
+      margin-left: 10px;
+      width: 150px;
+      padding: 0;
+      line-height: 32px;
+    }
   }
 }
 </style>

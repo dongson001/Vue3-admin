@@ -89,6 +89,7 @@ export const post = (url, params) => {
 };
 
 export const get = (url, params) => {
+  console.log('params:', params)
   return new Promise((resolve, reject) => {
     instance
       .get(url, { params })

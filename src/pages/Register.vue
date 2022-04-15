@@ -55,7 +55,7 @@ import { register } from '../api/user';
 import { message } from 'ant-design-vue';
 import { UserOutlined, LockOutlined } from '@ant-design/icons-vue';
 const formState = reactive({
-  email: 'dz@qq.com',
+  email: '825826837@qq.com',
   nickname: 'dz',
   passwd: 'a123456',
   repasswd: 'a123456',
