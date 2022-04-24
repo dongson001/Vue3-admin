@@ -14,6 +14,13 @@ const routes = [
       /* webpackChunkName: "userList" */ '../pages/UserList.vue'
     ),
   },
+  {
+    path: '/uc',
+    name: 'uc',
+    component: import(
+      /* webpackChunkName: "uc" */ '../pages/uc.vue'
+    ),
+  },
 ];
 
 const router = createRouter({

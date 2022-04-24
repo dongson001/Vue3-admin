@@ -44,6 +44,9 @@
           </div>
         </a-form-item>
         <a-form-item :wrapper-col="{ offset: 8, span: 16 }">
+          还没账号？<a-button type="text" @click="toRegister">注册</a-button>
+        </a-form-item>
+        <a-form-item :wrapper-col="{ offset: 8, span: 16 }">
           <a-button type="primary" html-type="submit">登 录</a-button>
         </a-form-item>
       </a-form>
@@ -134,6 +137,10 @@ function sendEmailCode() {
       clearInterval(state.time);
     }
   }, 1000);
+}
+
+function toRegister() {
+  router.push('/register');
 }
 
 const onFinishFailed = (errorInfo) => {
