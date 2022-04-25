@@ -50,10 +50,10 @@ instance.interceptors.response.use(
   }
 );
 
-export const post = (url, params) => {
+export const post = (url, params, obj) => {
   return new Promise((resolve, reject) => {
     instance
-      .post(url, params)
+      .post(url, params, obj)
       .then((res) => {
         resolve(res.data);
       })
