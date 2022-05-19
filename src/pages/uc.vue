@@ -6,7 +6,25 @@
         <input type="file" name="file" @change="handleFileChange" />
       </div>
       <div>
+        上传进度条：
         <a-progress :percent="state.fileProgress" />
+      </div>
+      <div>
+        计算hash进度条：
+        <a-progress :percent="state.hashProgress" />
+      </div>
+      <div>
+        <div class="cube-container">
+          <div class="cube" v-for="chunk in state.chunks" :key="chunk.index">
+            <div
+            :class="{
+              'uploading':'',
+              'success':''
+            }"
+            >
+            </div>
+          </div>
+        </div>
       </div>
       <a-button @click="upload">上传</a-button>
     </div>
@@ -16,13 +34,15 @@
 <script setup>
 import { reactive, onMounted, ref } from 'vue';
 import { uploadFile } from '../api/user';
+import sparkMD5 from 'spark-md5';
 let state = reactive({
   file: null,
   fileProgress: 0,
-  chunks: []
+  worker: null,
+  hashProgress: 0
 });
 
-const CHUNK_SIZE = 0.5 * 1024 * 1024
+const CHUNK_SIZE = 0.05 * 1024 * 1024
 
 async function blobToString(blob) {
   return new Promise(resolve =>{
@@ -87,12 +107,92 @@ function createFileChunk(file, size = CHUNK_SIZE) {
   return chunks
 }
 
-async function calculateHashWorker() {
-
+async function calculateHashWorker(chunks) {
+  return new Promise(resolve =>{
+    state.worker = new Worker('/hash.js')
+    state.worker.onmessage = e =>{
+      const {progress,hash} =e.data
+      state.hashProgress = Number(progress.toFixed(2))
+      if(hash){
+        resolve(hash)
+      }
+    }
+    state.worker.postMessage({
+      chunks
+    })
+  })
 }
-async function calculateHashIdle() {
+async function calculateHashIdle(chunks) {
+  return new Promise(resolve =>{
+    const spark = new sparkMD5.ArrayBuffer()
+    let count = 0
 
+    const appendToSpark = async file=>{
+      return new Promise(resolve =>{
+        const reader = new FileReader()
+        reader.readAsArrayBuffer(file)
+        reader.onload = e=>{
+          spark.append(e.target.result)
+          resolve()
+        }
+      })
+    }
+    const workLoop = async deadline => {
+      while (count < chunks.length 
+      && deadline.timeRemaining() > 1
+      ) {
+        await appendToSpark(chunks[count].file)
+        count++
+        if(count< chunks.length){
+          state.hashProgress = Number((100*count /chunks.length).toFixed(2))
+        }else {
+          state.hashProgress = 100
+          resolve(spark.end())
+        }
+      }
+      window.requestIdleCallback(workLoop)
+    } 
+    window.requestIdleCallback(workLoop)
+  })
 }
+
+async function calculateHashSample(chunks) {
+  // 布隆过滤器 判断一个文件
+  // 1个G文件 抽样5M以内计算
+  return new Promise(resolve =>{
+    const spark = new sparkMD5.ArrayBuffer()
+    const render = new FileReader()
+    const file = state.file
+    const size = file.size
+    const offset = 2 * 1024 * 1024
+
+    let chunks = [file.slice(0, offset)]
+
+    let cur = offset
+
+    while(cur < size){
+      if((cur+offset) == size){
+        // 后面的
+        chunks.push(file.slice(cur, cur + offset))
+      }else {
+        // 中间区块
+        const mid = cur + offset/2
+        const end = cur + offset
+        chunks.push(file.slice(cur, cur + 2))
+        chunks.push(file.slice(mid, mid + 2))
+        chunks.push(file.slice(end-2, end))
+      } 
+      cur+= offset
+    }
+    render.readAsArrayBuffer(new Blob(chunks))
+    render.onload = e=>{
+      spark.append(e.target.result)
+      state.hashProgress = 100
+      resolve(spark.end())
+    }
+  })
+}
+
 
 async function upload() {
   // if(!await isImage(state.file)){
@@ -100,23 +200,58 @@ async function upload() {
   //   return
   // }
 
-  state.chunks = createFileChunk(state.file)
-  const hash = await calculateHashWorker()
-  console.log('chunk:', chunk)
+  let chunks = createFileChunk(state.file)
+  const hash = await calculateHashWorker(chunks)
+  console.log('hash:', hash)
+  // const hash1 = await calculateHashIdle(chunks)
+  // console.log('hash1:', hash1)
 
-  return
-  const form = new FormData();
-  form.append('name', 'file');
-  form.append('file', state.file);
-  uploadFile(form, {
-    onUploadProgress: (progress) => {
-      state.fileProgress = Number(
-        ((progress.loaded / progress.total) * 100).toFixed(2)
-      );
-    },
-  }).then((res) => {
-    console.log('res:', res);
-  });
+  // // 抽样算hash
+  // const hash3 = await calculateHashSample(chunks)
+  // console.log('hash3:', hash3)
+  state.chunks = chunks.map((chunk,index)=>{
+    const name = hash + '-' + index
+    return {
+      name,
+      hash,
+      index,
+      chunk: chunk.file
+    }
+  }) 
+
+  await uploadChunks()
+
+  // const form = new FormData();
+  // form.append('name', 'file');
+  // form.append('file', state.file);
+  // uploadFile(form, {
+  //   onUploadProgress: (progress) => {
+  //     state.fileProgress = Number(
+  //       ((progress.loaded / progress.total) * 100).toFixed(2)
+  //     );
+  //   },
+  // }).then((res) => {
+  //   console.log('res:', res);
+  // });
+}
+
+async function uploadChunks() {
+  const requests = state.chunks.map((chunk,index)=>{
+    const form = new FormData()
+    form.append('chunk',chunk.chunk)
+    form.append('name',chunk.name)
+    form.append('hash',chunk.hash)
+    return form
+  }).map((form,index) =>{
+    uploadFile(form, {
+      onUploadProgress: (progress) => {
+        state.chunks[index].fileProgress = Number(
+          ((progress.loaded / progress.total) * 100).toFixed(2)
+        );
+      },
+    })
+  })
+  await Promise.all(requests)
 }
 
 let drag = ref(null);
