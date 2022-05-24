@@ -14,14 +14,18 @@
         <a-progress :percent="state.hashProgress" />
       </div>
       <div>
-        <div class="cube-container">
+        {{ state.chunks}}
+        <div class="cube-container" :style="{width: cubeWidth +'px'}">
           <div class="cube" v-for="chunk in state.chunks" :key="chunk.index">
             <div
             :class="{
-              'uploading':'',
-              'success':''
+              'uploading': chunk.progress > 0 && chunk.progress < 100,
+              'success': chunk.progress === 100,
+              'error': chunk.progress < 0
             }"
+            :style="{height: state.chunks.fileProgress+'%'}"
             >
+              <loading-outlined v-if="chunk.progress > 0 && chunk.progress < 100" />
             </div>
           </div>
         </div>
@@ -32,14 +36,16 @@
 </template>
 
 <script setup>
-import { reactive, onMounted, ref } from 'vue';
+import { reactive, onMounted, ref, computed } from 'vue';
 import { uploadFile } from '../api/user';
 import sparkMD5 from 'spark-md5';
+import { LoadingOutlined } from '@ant-design/icons-vue';
 let state = reactive({
   file: null,
   fileProgress: 0,
   worker: null,
-  hashProgress: 0
+  chunks: [],
+  // hashProgress: 0
 });
 
 const CHUNK_SIZE = 0.05 * 1024 * 1024
@@ -215,7 +221,8 @@ async function upload() {
       name,
       hash,
       index,
-      chunk: chunk.file
+      chunk: chunk.file,
+      progress: 0,
     }
   }) 
 
@@ -245,7 +252,7 @@ async function uploadChunks() {
   }).map((form,index) =>{
     uploadFile(form, {
       onUploadProgress: (progress) => {
-        state.chunks[index].fileProgress = Number(
+        state.chunks[index].progress = Number(
           ((progress.loaded / progress.total) * 100).toFixed(2)
         );
       },
@@ -277,6 +284,19 @@ function bindEvents() {
 onMounted(() => {
   bindEvents();
 });
+
+const cubeWidth = computed(() => {
+  return Math.ceil(Math.sqrt(state.chunks.length)) * 16 
+});
+
+const hashProgress = computed(() => {
+  if(!state.file || state.chunks.length) {
+    return 0
+  }
+  const loaded = state.chunks.map(item=> item.chunk.size * item.progress).reduce((acc,cur)=>acc+cur,0)
+  return Number((loaded*100/state.file.size).toFixed(2))
+});
+
 </script>
 
 <style lang="scss" scoped>
@@ -288,5 +308,24 @@ onMounted(() => {
   // &:hover{
   //   border-color: red;
   // }
+}
+.cube-container {
+  .cube {
+    width: 14px;
+    height: 14px;
+    list-height: 12px;
+    border: 1px black solid;
+    background: #eeeeee;
+    float: left;
+    .success{
+      background: green;
+    }
+    .error{
+      background: red;
+    }
+    .uploading{
+      background: blue;
+    }
+  }
 }
 </style>
