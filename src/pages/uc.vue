@@ -14,7 +14,6 @@
         <a-progress :percent="state.hashProgress" />
       </div>
       <div>
-        {{ state.chunks}}
         <div class="cube-container" :style="{width: cubeWidth +'px'}">
           <div class="cube" v-for="chunk in state.chunks" :key="chunk.index">
             <div
@@ -23,7 +22,7 @@
               'success': chunk.progress === 100,
               'error': chunk.progress < 0
             }"
-            :style="{height: state.chunks.fileProgress+'%'}"
+            :style="{height: chunk.progress+'%'}"
             >
               <loading-outlined v-if="chunk.progress > 0 && chunk.progress < 100" />
             </div>
@@ -37,7 +36,7 @@
 
 <script setup>
 import { reactive, onMounted, ref, computed } from 'vue';
-import { uploadFile } from '../api/user';
+import { uploadFile, mergeFile } from '../api/user';
 import sparkMD5 from 'spark-md5';
 import { LoadingOutlined } from '@ant-design/icons-vue';
 let state = reactive({
@@ -207,8 +206,8 @@ async function upload() {
   // }
 
   let chunks = createFileChunk(state.file)
-  const hash = await calculateHashWorker(chunks)
-  console.log('hash:', hash)
+  state.hash = await calculateHashWorker(chunks)
+  console.log('hash:', state.hash)
   // const hash1 = await calculateHashIdle(chunks)
   // console.log('hash1:', hash1)
 
@@ -216,10 +215,10 @@ async function upload() {
   // const hash3 = await calculateHashSample(chunks)
   // console.log('hash3:', hash3)
   state.chunks = chunks.map((chunk,index)=>{
-    const name = hash + '-' + index
+    const name = state.hash + '-' + index
     return {
       name,
-      hash,
+      hash: state.hash,
       index,
       chunk: chunk.file,
       progress: 0,
@@ -228,18 +227,14 @@ async function upload() {
 
   await uploadChunks()
 
-  // const form = new FormData();
-  // form.append('name', 'file');
-  // form.append('file', state.file);
-  // uploadFile(form, {
-  //   onUploadProgress: (progress) => {
-  //     state.fileProgress = Number(
-  //       ((progress.loaded / progress.total) * 100).toFixed(2)
-  //     );
-  //   },
-  // }).then((res) => {
-  //   console.log('res:', res);
-  // });
+}
+
+async function mergeRequest() {
+  const ret = await mergeFile({
+    ext: state.file.name.split('.').pop(),
+    size: CHUNK_SIZE,
+    hash: state.hash
+  })
 }
 
 async function uploadChunks() {
@@ -259,6 +254,7 @@ async function uploadChunks() {
     })
   })
   await Promise.all(requests)
+  await mergeRequest()
 }
 
 let drag = ref(null);
