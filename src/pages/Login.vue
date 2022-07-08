@@ -31,7 +31,7 @@
             <img @click="getCaptcha" :src="state.captcha" alt="" />
           </div>
         </a-form-item>
-        <a-form-item label="邮箱验证码" name="emailcode">
+        <!-- <a-form-item label="邮箱验证码" name="emailcode">
           <div class="flex">
             <a-input v-model:value="formState.emailcode" />
             <a-button
@@ -42,7 +42,7 @@
               >{{ sendText }}</a-button
             >
           </div>
-        </a-form-item>
+        </a-form-item> -->
         <a-form-item :wrapper-col="{ offset: 8, span: 16 }">
           还没账号？<a-button type="text" @click="toRegister">注册</a-button>
         </a-form-item>

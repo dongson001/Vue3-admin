@@ -7,3 +7,5 @@ export const register = p => post('api/user/register', p)
 export const sendEmail = p => get('api/sendEmail', p)
 export const uploadFile = (p, obj) => post('api/uploadFile', p, obj)
 export const mergeFile = (p, obj) => post('api/mergeFile', p, obj)
+export const menuList = (p, obj) => post('api/user/nav', p, obj)
+

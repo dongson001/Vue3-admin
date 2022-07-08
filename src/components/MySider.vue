@@ -6,6 +6,16 @@
       @click="menuClick"
       mode="inline"
     >
+      <!-- <component
+        :index="item.url || String(item.id)"
+        v-for="item in navList"
+        :key="item.id"
+        :is="
+          item.children && item.children.length > 0
+            ? 'a-sub-menu'
+            : 'a-menu-item'
+        "
+      ></component> -->
       <a-sub-menu key="sub1">
         <template #title>
           <span>
@@ -18,38 +28,17 @@
         <a-menu-item key="3">option3</a-menu-item>
         <a-menu-item key="4">option4</a-menu-item>
       </a-sub-menu>
-      <!-- <a-sub-menu key="sub2">
-        <template #title>
-          <span>
-            <laptop-outlined />
-            subnav 2
-          </span>
-        </template>
-        <a-menu-item key="5">option5</a-menu-item>
-        <a-menu-item key="6">option6</a-menu-item>
-        <a-menu-item key="7">option7</a-menu-item>
-        <a-menu-item key="8">option8</a-menu-item>
-      </a-sub-menu>
-      <a-sub-menu key="sub3">
-        <template #title>
-          <span>
-            <notification-outlined />
-            subnav 3
-          </span>
-        </template>
-        <a-menu-item key="9">option9</a-menu-item>
-        <a-menu-item key="10">option10</a-menu-item>
-        <a-menu-item key="11">option11</a-menu-item>
-        <a-menu-item key="12">option12</a-menu-item>
-      </a-sub-menu> -->
     </a-menu>
   </a-layout-sider>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { UserOutlined } from '@ant-design/icons-vue';
+import { userStore } from '../store/user';
+import { storeToRefs } from 'pinia';
+const { navList } = storeToRefs(userStore());
 const router = useRouter();
 let selectedKeys2 = ref(['1']);
 let openKeys = ref(['sub1']);
@@ -57,6 +46,7 @@ function menuClick({ item, key, keyPath }) {
   console.log('item, key, keyPath:', item, key, keyPath)
   router.push(key)
 }
+
 </script>
 
 <style lang="scss" scoped></style>

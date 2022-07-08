@@ -22,9 +22,8 @@ import { useRoute } from 'vue-router';
 import MyHeader from './components/MyHeader.vue';
 import MySider from './components/MySider.vue';
 import MyContent from './components/MyContent.vue';
-import { userInfo } from './api/user';
 import { onMounted, reactive } from 'vue';
-let route = useRoute();
+const route = useRoute()
 const menuList = [
   {
     name: '开发中心',
@@ -44,14 +43,6 @@ const menuList = [
   }
 ]
 let user = reactive({});
-onMounted(() => {
-  userInfo().then((res) => {
-    if (res.code === 0) {
-      user = res.data;
-      console.log('user:', user);
-    }
-  });
-});
 </script>
 
 <style lang="scss">

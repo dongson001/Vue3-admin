@@ -38,6 +38,7 @@
 import { reactive, onMounted, ref, computed } from 'vue';
 import { uploadFile, mergeFile } from '../api/user';
 import sparkMD5 from 'spark-md5';
+import { userStore } from '../store/user'
 import { LoadingOutlined } from '@ant-design/icons-vue';
 let state = reactive({
   file: null,
@@ -278,6 +279,8 @@ function bindEvents() {
 }
 
 onMounted(() => {
+  const store = userStore()
+  console.log('store:', store)
   bindEvents();
 });
 
