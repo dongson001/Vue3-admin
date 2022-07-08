@@ -35,9 +35,9 @@ watch(
 
 
 function handelClick({ item, key, keyPath }){
-  router.push({
-    name: key
-  })
+  // router.push({
+  //   name: key
+  // })
 }
 </script>
 

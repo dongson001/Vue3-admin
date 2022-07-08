@@ -16,7 +16,15 @@
             : 'a-menu-item'
         "
       ></component> -->
-      <a-sub-menu key="sub1">
+      <a-sub-menu v-for="n in navList" :key="n.id">
+        <template #title>
+          <span>
+            <user-outlined />
+            {{ n.name }}
+          </span>
+        </template>
+      </a-sub-menu>
+      <!-- <a-sub-menu key="sub1">
         <template #title>
           <span>
             <user-outlined />
@@ -27,7 +35,7 @@
         <a-menu-item key="uc">用户中心</a-menu-item>
         <a-menu-item key="3">option3</a-menu-item>
         <a-menu-item key="4">option4</a-menu-item>
-      </a-sub-menu>
+      </a-sub-menu> -->
     </a-menu>
   </a-layout-sider>
 </template>
@@ -43,10 +51,9 @@ const router = useRouter();
 let selectedKeys2 = ref(['1']);
 let openKeys = ref(['sub1']);
 function menuClick({ item, key, keyPath }) {
-  console.log('item, key, keyPath:', item, key, keyPath)
-  router.push(key)
+  console.log('item, key, keyPath:', item, key, keyPath);
+  router.push(key);
 }
-
 </script>
 
 <style lang="scss" scoped></style>
