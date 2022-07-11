@@ -13,8 +13,8 @@
 
 <script setup>
 import { ref, watch } from 'vue';
-import { userStore } from '../store/user';
 import { useRouter } from 'vue-router';
+import { userStore } from '../store/user';
 import { storeToRefs } from 'pinia';
 const { menuList } = storeToRefs(userStore());
 const router = useRouter();

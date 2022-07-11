@@ -1,13 +1,11 @@
 import { defineStore } from 'pinia';
-import { menuList } from '../api/user';
+import { menuList, userInfo } from '../api/user';
 
 export const userStore = defineStore({
   id: 'user',
   state: () => {
     return {
-      userInfo: {
-        name: '123',
-      },
+      userInfo: {},
       menuList: [],
       navList: [],
     };
@@ -21,6 +19,10 @@ export const userStore = defineStore({
       } else {
         return false;
       }
+    },
+    async getUserInfo() {
+      let res = await userInfo(); // 获取权限
+      this.userInfo = res.data;
     },
     setNavList(navList) {
       this.navList = navList;

@@ -5,7 +5,7 @@ import Register from '../pages/Register.vue';
 import { userStore } from '../store/user';
 
 const routes = [
-  { path: '/', redirect: '/home'},
+  { path: '/', name: 'home', redirect: '/home'},
   { path: '/home',  name: 'home', component: Home,},
   { path: '/login', name: 'login', component: Login, meta: { noAauth: true } },
   {
@@ -26,6 +26,15 @@ const routes = [
     name: 'uc',
     component: import(/* webpackChunkName: "uc" */ '../pages/uc.vue'),
   },
+  {
+    path: '/404',
+    name: '404',
+    component: import(/* webpackChunkName: "404" */ '../pages/404.vue'),
+  },
+  {
+    path: '/:pathMatch(.*)',
+    redirect: '/404'
+  }
 ];
 
 let defaultRoutes = routes.filter((i) => {
@@ -61,6 +70,7 @@ router.beforeEach(async (to, from, next) => {
     if (to.path !== '/login' && stores.menuList.length === 0) {
       // 判断是否获取过权限
       let res = await stores.getMenuList(); // 获取权限列表
+      await stores.getUserInfo(); // 获取权限列表
       if (res) {
         getRoutesAuth(); // 根据权限列表挂载路由
         next({ path: to.fullPath }); // 跳转页面
@@ -68,12 +78,9 @@ router.beforeEach(async (to, from, next) => {
         // 获取权限失败返回到来源页面
         next({ path: from.path });
       }
-    } else if (router.hasRoute(to.name)) {
-      // 判断路由是否存在
-      next();
     } else {
       // 路由不存在返回原页面
-      next({ path: from.path });
+      next();
     }
   }
 });
