@@ -28,7 +28,7 @@ instance.interceptors.response.use(
           router.push({
             path: '/login',
             query: {
-              redirect: router.currentRoute.fullPath,
+              redirect: router.name,
             },
           });
         }, 1000);

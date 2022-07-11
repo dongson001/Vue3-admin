@@ -23,6 +23,7 @@
           >
             <template v-if="!item.children || item.children.length === 0">
               <user-outlined />
+              <!-- <i icon="user-outlined"></i> -->
               <span>{{ item.name }}</span>
             </template>
             <template #title>
@@ -47,16 +48,24 @@
       <a-layout>
         <a-layout-header class="main-header" style="background: #fff;;padding: 0 15px;">
           <a-breadcrumb style="margin: 16px 0; flex:1;">
-            <a-breadcrumb-item>User</a-breadcrumb-item>
-            <a-breadcrumb-item>Bill</a-breadcrumb-item>
+            <a-breadcrumb-item v-if="route.meta.breadcrumb?.length>0">
+              <router-link :to="{ name: 'home' }">
+                <home-two-tone />
+              </router-link>
+            </a-breadcrumb-item>
+            <a-breadcrumb-item
+              v-for="item in route.meta.breadcrumb || []"
+              :key="item.route || item.label"
+              >
+              
+              <router-link :to="{ name: item.route }">
+                {{ item.label }}
+              </router-link>
+            </a-breadcrumb-item>
           </a-breadcrumb>
           <div>
             <fullscreen-outlined @click="toggle" style="margin-right: 10px;" />
-            <a-popover title="Title">
-              <template #content>
-                <p>Content</p>
-                <p>Content</p>
-              </template>
+            <a-dropdown>
               <a-avatar
                 shape="square"
                 size="large"
@@ -64,7 +73,17 @@
               >
                 {{ userInfo.nickname }}
               </a-avatar>
-            </a-popover>
+              <template #overlay>
+                <a-menu>
+                  <a-menu-item @click="myClick">
+                    个人中心
+                  </a-menu-item>
+                  <a-menu-item @click="quitClicK">
+                    退出系统
+                  </a-menu-item>
+                </a-menu>
+              </template>
+            </a-dropdown>
             <setting-two-tone @click="state.settingVisible = true" style="margin-left: 10px;" />
           </div>
         </a-layout-header>
@@ -104,7 +123,8 @@ import {
   TeamOutlined,
   FileOutlined,
   FullscreenOutlined,
-  SettingTwoTone
+  SettingTwoTone,
+  HomeTwoTone,
 } from '@ant-design/icons-vue';
 import { userStore } from './store/user';
 import { storeToRefs } from 'pinia';
@@ -126,14 +146,26 @@ function handleClick(menuInfo) {
 };
 
 const { isFullscreen, enter, exit, toggle } = useFullscreen()
-
 let state = reactive({
   settingVisible: false
 })
 
+function myClick() {
+  router.push({ name: 'uc' });
+}
+
+function quitClicK() {
+  localStorage.removeItem('token');
+  router.push({ name: 'login', query: {
+    redirect: route.name
+  }});
+}
 </script>
 
 <style lang="scss">
+#app{
+  height: 100%;
+}
 .logo {
   height: 32px;
   margin: 16px;

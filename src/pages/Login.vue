@@ -154,11 +154,14 @@ const onFinishFailed = (errorInfo) => {
   display: flex;
   justify-content: center;
   align-items: center;
+  background: url(../assets/bg.gif) no-repeat;
+  background-size: 100% 100%;
   .login_container_box {
     padding: 50px;
     margin-top: 100px;
     width: 500px;
     border: 1px solid #ccc;
+    background: #FFF;
     .emailcode {
       margin-left: 10px;
       width: 150px;

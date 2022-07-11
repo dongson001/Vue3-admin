@@ -20,11 +20,31 @@ const routes = [
     component: import(
       /* webpackChunkName: "userList" */ '../pages/UserList.vue'
     ),
+    meta: {
+      breadcrumb: [
+        {
+          label: "用户管理",
+        },
+        {
+          label: "用户列表",
+        },
+      ],
+    }
   },
   {
     path: '/uc',
     name: 'uc',
     component: import(/* webpackChunkName: "uc" */ '../pages/uc.vue'),
+    meta: {
+      breadcrumb: [
+        {
+          label: "用户管理",
+        },
+        {
+          label: "用户中心",
+        },
+      ],
+    }
   },
   {
     path: '/404',
@@ -61,13 +81,17 @@ const router = createRouter({
   routes: defaultRoutes,
 });
 
+const whiteListRouter = ['register','404']
+
 router.beforeEach(async (to, from, next) => {
-  if (to.path !== '/login' && !localStorage.getItem('token')) {
+  if(whiteListRouter.includes(to.name)) {
+    next()
+  }else if (to.path !== '/login' && !localStorage.getItem('token')) {
     // 判断是否登录  非`login`页面无`token`的话跳转到登录页面
     next({ path: '/login' });
   } else {
     const stores = userStore(); // pinia 状态管理
-    if (to.path !== '/login' && stores.menuList.length === 0) {
+    if ((to.path !== '/login') && stores.menuList.length === 0) {
       // 判断是否获取过权限
       let res = await stores.getMenuList(); // 获取权限列表
       await stores.getUserInfo(); // 获取权限列表
